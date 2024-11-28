@@ -1,105 +1,105 @@
 <template>
   <div>
-    <el-tooltip class="item" content="发色图救救北极熊">
+    <el-tooltip class="item" content="Encrypt images to save polar bears">
       <a href="#" @click.prevent="openGui" class="gui-button">
-        <img src="https://ww1.sinaimg.cn/mw690/be15a4ddjw8fbet7h4rpoj209z0c7q39.jpg" width="40px" height="49px">
+        <img src="https://ww1.sinaimg.cn/mw690/be15a4ddjw8fbet7h4rpoj209z0c7q39.jpg" width="40" height="49">
       </a>
     </el-tooltip>
 
     <el-dialog title="weibo-img-crypto v1.4.0" :visible.sync="dialogVisible">
       <el-tabs>
-        <el-tab-pane label="基础">
+        <el-tab-pane label="Basic">
           <el-form label-width="100px">
-            <el-form-item label="加密">
+            <el-form-item label="Encryption">
               <el-switch v-model="form.enableEncryption"></el-switch>
             </el-form-item>
-            <el-form-item label="解密">
+            <el-form-item label="Decryption">
               <el-switch v-model="form.enableDecryption"></el-switch>
             </el-form-item>
-            <el-form-item label="自动去水印">
+            <el-form-item label="Auto Remove Watermark">
               <el-switch v-model="form.noWaterMark"></el-switch>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane label="高级">
+        <el-tab-pane label="Advanced">
           <el-form label-width="100px">
-            <el-form-item label="算法">
-              <el-select v-model="form.codecName" placeholder="无">
-                <el-option label="反色" value="InvertCodec"></el-option>
-                <el-option label="RGB随机置乱" value="ShuffleRgbCodec"></el-option>
-                <el-option label="块随机置乱" value="ShuffleBlockCodec"></el-option>
-                <el-option label="半反色" value="HalfInvertCodec"></el-option>
+            <el-form-item label="Algorithm">
+              <el-select v-model="form.codecName" placeholder="None">
+                <el-option label="Invert Colors" value="InvertCodec"></el-option>
+                <el-option label="Shuffle RGB" value="ShuffleRgbCodec"></el-option>
+                <el-option label="Shuffle Blocks" value="ShuffleBlockCodec"></el-option>
+                <el-option label="Partial Invert" value="HalfInvertCodec"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="随机种子">
+            <el-form-item label="Random Seed">
               <el-input v-model="form.randomSeed"></el-input>
             </el-form-item>
-            <el-form-item label="解密后处理">
-              <el-select v-model="form.postProcess" placeholder="无">
-                <el-option label="无" value=""></el-option>
-                <el-option label="高斯模糊（消除高频噪声）" value="gaussianBlur"></el-option>
-                <el-option label="中值滤波（消除水印造成的椒盐噪声）" value="medianBlur"></el-option>
+            <el-form-item label="Post Decrypt Processing">
+              <el-select v-model="form.postProcess" placeholder="None">
+                <el-option label="None" value=""></el-option>
+                <el-option label="Gaussian Blur (removes high-frequency noise)" value="gaussianBlur"></el-option>
+                <el-option label="Median Filter (removes salt-and-pepper noise)" value="medianBlur"></el-option>
               </el-select>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
-        <el-tab-pane label="选择图片">
+        <el-tab-pane label="Select Image">
           <select-img></select-img>
         </el-tab-pane>
 
-        <el-tab-pane label="帮助和关于">
+        <el-tab-pane label="Help and About">
           <div class="child-mb">
             <p>
-              使用方法：上传图片时自动加密，在图片上点击鼠标右键自动解密。加密解密时的算法、随机种子必须一致。如果加了水印，解密后的图片会有杂色，开启自动去水印会在上传时临时关闭你的水印。一般情况下不建议添加解密后处理，如果你实在忍受不了解密后的噪声再添加
+              Instructions: Encryption is applied automatically when uploading images. Right-click on the image to decrypt automatically. Ensure the same algorithm and random seed are used for encryption and decryption. If a watermark is added, the decrypted image may have artifacts. Enable auto-remove watermark to avoid this. Post-decrypt processing is generally unnecessary unless noise artifacts are severe.
             </p>
             <p>
-              算法说明：推荐使用块随机置乱算法，这样不会出现有损压缩再解密造成的高频噪声。RGB随机置乱算法会出现有损压缩再解密造成的高频噪声。至于反色算法只是作者平时用来看某些博主的色图用的，不算加密
+              Algorithm Recommendations: "Shuffle Blocks" is ideal as it avoids high-frequency noise caused by lossy compression. "Shuffle RGB" may result in such noise. "Invert Colors" is mainly for specific visual effects and isn't suitable for robust encryption.
             </p>
             <p>
-              推荐使用<a href="https://greasyfork.org/zh-CN/scripts/370359-weibo-img-crypto" target="_blank">油猴脚本</a>，可以最方便地使用 weibo-img-crypto，详情见 <a href="https://github.com/xfgryujk/weibo-img-crypto" target="_blank">GitHub 库 readme</a>
+              Recommended Tools: Use the <a href="https://greasyfork.org/zh-CN/scripts/370359-weibo-img-crypto" target="_blank">Tampermonkey Script</a> for seamless functionality. For details, see the <a href="https://github.com/xfgryujk/weibo-img-crypto" target="_blank">GitHub repository</a>.
             </p>
             <p>
-              作者：xfgryujk，微博 <a href="https://weibo.com/p/1005055023841292" target="_blank">@B1llyHerrington</a>。本项目以 MIT 协议开源，<a href="https://github.com/xfgryujk/weibo-img-crypto" target="_blank">上 GitHub 获取源码</a>
+              Author: xfgryujk. Follow them on Weibo: <a href="https://weibo.com/p/1005055023841292" target="_blank">@B1llyHerrington</a>. Project is open-sourced under the MIT license. View the <a href="https://github.com/xfgryujk/weibo-img-crypto" target="_blank">GitHub source code</a>.
             </p>
           </div>
         </el-tab-pane>
       </el-tabs>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="onOk">确 定</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="onOk">Confirm</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {getConfig, setConfig} from '../config'
-import SelectImg from './select-img'
+import { getConfig, setConfig } from '../config';
+import SelectImg from './select-img';
 
 export default {
   components: {
-    SelectImg
+    SelectImg,
   },
-  data () {
+  data() {
     return {
       dialogVisible: false,
       form: getConfig(),
-    }
+    };
   },
   methods: {
-    openGui () {
-      this.dialogVisible = true
-      this.form = getConfig()
+    openGui() {
+      this.dialogVisible = true;
+      this.form = getConfig();
     },
-    onOk () {
-      this.dialogVisible = false
-      setConfig(this.form)
-    }
-  }
-}
+    onOk() {
+      this.dialogVisible = false;
+      setConfig(this.form);
+    },
+  },
+};
 </script>
 
 <style scoped>

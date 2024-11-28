@@ -1,23 +1,24 @@
-import Vue from 'vue'
-import ElementUI from 'element-ui'
-import {initHooks} from './hooks'
-import {initGui} from './gui'
+import Vue from 'vue';
+import ElementUI from 'element-ui';
+import { initHooks } from './hooks';
+import { initGui } from './gui';
 
-function main () {
-  Vue.use(ElementUI)
-  // 引入CSS的偷懒方法（其实是因为webpack总是编译失败放弃了）
-  let css = document.createElement('link')
-  css.rel = 'stylesheet'
-  css.href = 'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
-  document.body.appendChild(css)
+function main() {
+    Vue.use(ElementUI);
 
-  initHooks()
-  initGui()
+    // Lazy way to include CSS (actually, because webpack compilation kept failing)
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://unpkg.com/element-ui/lib/theme-chalk/index.css';
+    document.body.appendChild(css);
+
+    initHooks();
+    initGui();
 }
 
 if (window.isWbImgCryptoLoaded) {
-  window.alert('weibo-img-crypto 已经加载，请不要重复加载')
+    window.alert('weibo-img-crypto is already loaded. Please do not load it again.');
 } else {
-  window.isWbImgCryptoLoaded = true
-  main()
+    window.isWbImgCryptoLoaded = true;
+    main();
 }

@@ -1,67 +1,64 @@
-// 从谷歌V8引擎抄来的 https://github.com/v8/v8/blob/dae6dfe08ba9810abbe7eee81f7c58e999ae8525/src/math.js#L144
+// Adapted from Google V8 Engine: 
+// https://github.com/v8/v8/blob/dae6dfe08ba9810abbe7eee81f7c58e999ae8525/src/math.js#L144
 export class Random {
-  constructor (seed = new Date().getTime()) {
-    this._setRngstate(seed)
-  }
-
-  // seed可以是字符串
-  _setRngstate (seed) {
-    // JS真没有好判断字符串是数字的办法
-    if (/^-?\d{1,10}$/.test(seed) && seed >= -0x80000000 && seed <= 0x7FFFFFFF) {
-      seed = parseInt(seed)
-    } else {
-      seed = this._hashCode(seed)
+    constructor(seed = new Date().getTime()) {
+        this._setRngstate(seed);
     }
-    this._rngstate = [seed & 0xFFFF, seed >>> 16]
-  }
 
-  // 抄Java的
-  _hashCode (str) {
-    let hash = 0
-    // JS的字符串是UTF-16编码
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash * 31 + str.charCodeAt(i)) & 0xFFFFFFFF
+    // Seed can be a string
+    _setRngstate(seed) {
+        // No good way in JS to determine if a string is a valid number
+        if (/^-?\d{1,10}$/.test(seed) && seed >= -0x80000000 && seed <= 0x7FFFFFFF) {
+            seed = parseInt(seed);
+        } else {
+            seed = this._hashCode(seed);
+        }
+        this._rngstate = [seed & 0xFFFF, seed >>> 16];
     }
-    return hash
-  }
 
-  // 返回[0, 1)
-  random () {
-    let r0 = (Math.imul(18030, this._rngstate[0] & 0xFFFF) + (this._rngstate[0] >>> 16)) | 0
-    this._rngstate[0] = r0
-    let r1 = (Math.imul(36969, this._rngstate[1] & 0xFFFF) + (this._rngstate[1] >>> 16)) | 0
-    this._rngstate[1] = r1
-    let x = ((r0 << 16) + (r1 & 0xFFFF)) | 0
-    // Division by 0x100000000 through multiplication by reciprocal.
-    return (x < 0 ? (x + 0x100000000) : x) * 2.3283064365386962890625e-10
-  }
+    // Borrowed from Java
+    _hashCode(str) {
+        let hash = 0;
+        // Strings in JS are UTF-16 encoded
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash * 31 + str.charCodeAt(i)) & 0xFFFFFFFF;
+        }
+        return hash;
+    }
 
-  // 返回[min, max]的整数
-  randint (min, max) {
-    return Math.floor(min + this.random() * (max - min + 1))
-  }
+    // Returns a random number in [0, 1)
+    random() {
+        const r0 = (Math.imul(18030, this._rngstate[0] & 0xFFFF) + (this._rngstate[0] >>> 16)) | 0;
+        this._rngstate[0] = r0;
+        const r1 = (Math.imul(36969, this._rngstate[1] & 0xFFFF) + (this._rngstate[1] >>> 16)) | 0;
+        this._rngstate[1] = r1;
+        const x = ((r0 << 16) + (r1 & 0xFFFF)) | 0;
+        // Division by 0x100000000 through multiplication by reciprocal
+        return (x < 0 ? x + 0x100000000 : x) * 2.3283064365386962890625e-10;
+    }
+
+    // Returns an integer in [min, max]
+    randint(min, max) {
+        return Math.floor(min + this.random() * (max - min + 1));
+    }
 }
 
-// 生成[0, length)的随机序列，每次调用next()返回和之前不重复的值，直到[0, length)用完
+// Generates a random sequence in [0, length) such that each call to next() returns a value not previously returned, until exhausted
 export class RandomSequence {
-  constructor (length, seed) {
-    this._rng = new Random(seed)
-    this._list = new Array(length)
-    for (let i = 0; i < length; i++) {
-      this._list[i] = i
+    constructor(length, seed) {
+        this._rng = new Random(seed);
+        this._list = Array.from({ length }, (_, i) => i);
+        this._nextMin = 0;
     }
-    this._nextMin = 0
-  }
 
-  next () {
-    if (this._nextMin >= this._list.length) {
-      this._nextMin = 0
+    next() {
+        if (this._nextMin >= this._list.length) {
+            this._nextMin = 0;
+        }
+        const index = this._rng.randint(this._nextMin, this._list.length - 1);
+        const result = this._list[index];
+        [this._list[index], this._list[this._nextMin]] = [this._list[this._nextMin], this._list[index]];
+        this._nextMin++;
+        return result;
     }
-    let index = this._rng.randint(this._nextMin, this._list.length - 1)
-    let result = this._list[index]
-    this._list[index] = this._list[this._nextMin]
-    this._list[this._nextMin] = result
-    this._nextMin++
-    return result
-  }
 }

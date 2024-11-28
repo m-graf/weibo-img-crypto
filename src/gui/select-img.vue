@@ -1,17 +1,17 @@
 <template>
   <div>
-    <p class="mb">这个功能是用来从微博之外选择图片加解密的</p>
+    <p class="mb">This feature allows you to select images for encryption and decryption outside of Weibo</p>
     <el-form label-width="100px">
-      <el-form-item label="处理">
-        <el-switch v-model="isEncryption" active-text="加密" inactive-text="解密"></el-switch>
+      <el-form-item label="Action">
+        <el-switch v-model="isEncryption" active-text="Encrypt" inactive-text="Decrypt"></el-switch>
       </el-form-item>
-      <el-form-item label="粘贴图片">
-        <el-input @paste.native.prevent="onPaste" placeholder="也可以在此处粘贴图片"></el-input>
+      <el-form-item label="Paste Image">
+        <el-input @paste.native.prevent="onPaste" placeholder="You can also paste images here"></el-input>
       </el-form-item>
-      <el-form-item label="选择图片">
+      <el-form-item label="Select Image">
         <el-upload action="" drag multiple list-type="picture" :file-list="fileList" :before-upload="onUpload" :on-remove="onRemove" :on-preview="onPreview">
           <i class="el-icon-upload"></i>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击选择</em></div>
+          <div class="el-upload__text">Drag files here, or <em>click to select</em></div>
         </el-upload>
       </el-form-item>
     </el-form>
@@ -25,12 +25,12 @@
 </template>
 
 <script>
-import {encrypt, decrypt} from '../codec'
+import { encrypt, decrypt } from '../codec'
 
 export default {
-  data () {
+  data() {
     return {
-      isEncryption: true,
+      isEncryption: true, // Default action: Encrypt
       fileList: [],
       largeImgTitle: '',
       largeImgVisible: false,
@@ -39,64 +39,70 @@ export default {
     }
   },
   methods: {
-    onPaste (event) {
+    // Handles paste event for images
+    onPaste(event) {
       for (let item of event.clipboardData.items) {
-        let file = item.getAsFile()
+        let file = item.getAsFile();
         if (file) {
-          this.handleFile(file)
+          this.handleFile(file);
         }
       }
     },
-    onUpload (file) {
-      this.handleFile(file)
-      return false
+    // Handles file upload event
+    onUpload(file) {
+      this.handleFile(file);
+      return false; // Prevent auto upload
     },
-    handleFile (file) {
-      if (!file.type.startsWith('image') || file.type === 'image/gif') { // 暂时不支持GIF
-        return
+    // Process file for encryption/decryption
+    handleFile(file) {
+      if (!file.type.startsWith('image') || file.type === 'image/gif') { // Skip GIFs for now
+        return;
       }
-      let reader = new window.FileReader()
+      let reader = new FileReader();
       reader.onload = () => {
-        let img = new window.Image()
+        let img = new Image();
         img.onload = () => {
           if (this.isEncryption) {
-            this.fileList.push({name: file.name, url: encrypt(img)})
+            this.fileList.push({ name: file.name, url: encrypt(img) });
           } else {
-            decrypt(img).then(url => this.fileList.push({name: file.name, url: url}))
+            decrypt(img).then(url => this.fileList.push({ name: file.name, url: url }));
           }
-        }
-        img.src = reader.result
-      }
-      reader.readAsDataURL(file)
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
     },
-    onRemove (file, fileList) {
-      this.fileList = fileList
+    // Handles file removal from the list
+    onRemove(file, fileList) {
+      this.fileList = fileList;
     },
-    onPreview (file) {
-      this.largeImgTitle = file.name
-      this.largeImgUrl = file.url
-      window.URL.revokeObjectURL(this.largeImgUrlShort)
-      this.largeImgUrlShort = ''
-      this.largeImgVisible = true
+    // Previews the image in a dialog
+    onPreview(file) {
+      this.largeImgTitle = file.name;
+      this.largeImgUrl = file.url;
+      window.URL.revokeObjectURL(this.largeImgUrlShort);
+      this.largeImgUrlShort = '';
+      this.largeImgVisible = true;
     },
-    onClickLargeImg () {
-      let url
+    // Handles click on the large image preview
+    onClickLargeImg() {
+      let url;
       if (this.largeImgUrlShort) {
-        url = this.largeImgUrlShort
+        url = this.largeImgUrlShort;
       } else if (this.largeImgUrl.startsWith('data:')) {
-        // Chrome和Edge无法打开data URL？
-        let [memePart, base64Str] = this.largeImgUrl.split(',')
-        let meme = /:(.*?);/.exec(memePart)[1]
-        let dataStr = atob(base64Str)
-        let data = new Uint8Array(dataStr.length)
+        // Workaround for Chrome/Edge not opening data URLs directly
+        let [memePart, base64Str] = this.largeImgUrl.split(',');
+        let meme = /:(.*?);/.exec(memePart)[1];
+        let dataStr = atob(base64Str);
+        let data = new Uint8Array(dataStr.length);
         for (let i = 0; i < dataStr.length; i++) {
-          data[i] = dataStr.charCodeAt(i)
+          data[i] = dataStr.charCodeAt(i);
         }
-        url = this.largeImgUrlShort = window.URL.createObjectURL(new Blob([data], {type: meme}))
+        url = this.largeImgUrlShort = window.URL.createObjectURL(new Blob([data], { type: meme }));
       } else {
-        url = this.largeImgUrlShort = this.largeImgUrl
+        url = this.largeImgUrlShort = this.largeImgUrl;
       }
-      window.open(url) // Edge还是不允许打开blob URL，没办法了
+      window.open(url); // Edge still doesn't allow opening blob URLs directly, workaround
     }
   }
 }
